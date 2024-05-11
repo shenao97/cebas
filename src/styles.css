@@ -1,0 +1,52 @@
+body {
+  font-family: 'Sora', sans-serif !important;
+  background-color: #f8f9fa;
+  margin: 40px;
+  padding: 0;
+}
+
+form {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 10px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="time"],
+input[type="checkbox"],
+input[type="date"],
+
+select {
+  width: calc(100% - 12px);
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-family: 'Sora', sans-serif;
+}
+
+button {
+  grid-column: span 2;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif !important;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

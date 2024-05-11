@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>JavaScript Sandbox</title>
+  <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div id="app"></div>
+  <h2>Condiciones iniciales</h2>
+  <form id="parcelConfigForm">
+    <div>
+      <label for="rootsL">Profundidad del sensor de raíces (cm):</label>
+      <select id="rootsL" name="rootsL" required>
+        <option value="1">10</option>
+        <option value="2">20</option>
+        <option value="3">30</option>
+        <option value="4">40</option>
+        <option value="5">50</option>
+        <option value="6">60</option>
+      </select>
+    </div>
+    <div>
+      <label for="drainL">Profundidad del sensor de drenaje (cm):</label>
+      <select id="drainL" name="drainL" required>
+        <option value="1">10</option>
+        <option value="2">20</option>
+        <option value="3">30</option>
+        <option value="4">40</option>
+        <option value="5">50</option>
+        <option value="6">60</option>
+      </select>
+    </div>
+    <div>
+      <label for="aRootsTimelapse">Lapso de tiempo para raíces (h):</label>
+      <input type="number" id="aRootsTimelapse" name="aRootsTimelapse" required>
+    </div>
+    <div>
+      <label for="aDrainTimelapse">Lapso de tiempo para drenaje (h):</label>
+      <input type="number" id="aDrainTimelapse" name="aDrainTimelapse" required>
+    </div>
+    <div>
+      <label for="rootsLThreshold">Umbral de raíces:</label>
+      <input type="number" id="rootsLThreshold" name="rootsLThreshold" step="0.1" required>
+    </div>
+    <div>
+      <label for="drainLThreshold">Umbral de drenaje:</label>
+      <input type="number" id="drainLThreshold" name="drainLThreshold" step="0.1" required>
+    </div>
+    <div>
+      <label for="percentageIncrement">Porcentaje variación (%):</label>
+      <input type="number" id="percentageIncrement" name="percentageIncrement" required>
+    </div>
+    <div>
+      <label for="baseIrrigation">Base de riego (min):</label>
+      <input type="number" id="baseIrrigation" name="baseIrrigation" required>
+    </div>
+    <div>
+      <label for="minIrrigationTimeMin">Duración mínima de riego (min) :</label>
+      <input type="number" id="minIrrigationTimeMin" name="minIrrigationTimeMin" required>
+    </div>
+    <div>
+      <label for="maxIrrigationTimeMin">Duración máxima de riego (min):</label>
+      <input type="number" id="maxIrrigationTimeMin" name="maxIrrigationTimeMin" required>
+    </div>
+    <div>
+      <label for="startTime1">Fecha inicio:</label>
+      <input type="date" id="initialDate" name="initialDate" required>
+    </div>
+    <div>
+      <label for="startTime1">Inicio 1° irrigación:</label>
+      <input type="time" id="startTime1" name="startTime1" required>
+    </div>
+    <div>
+      <label for="startTime2">Inicio 2° irrigación (opcional):</label>
+      <input type="time" id="startTime2" name="startTime2">
+    </div>
+    <div>
+      <label for="startTime2">Inicio 3° irrigación (opcional):</label>
+      <input type="time" id="startTime3" name="startTime3">
+    </div>
+    <button type="submit" value="set initialConditions">Establecer configuración inicial</button>
+  </form>
+
+
+
+
+  <h2>Formulario de Irrigación</h2>
+  <form id="irrigationForm">
+    <label for="bRoots">Medición sensor de raices antes de riego:</label><br>
+    <input type="number" id="bRoots" name="bRoots" value="11" step="0.01" ><br><br>
+
+    <label for="aRoots">Medición sensor de raices despues de riego:</label><br>
+    <input type="number" id="aRoots" name="aRoots" value="10" step="0.01" ><br><br>
+
+    <label for="bDrain">Medición sensor de drenaje antes de riego:</label><br>
+    <input type="number" id="bDrain" name="bDrain" value="10" step="0.01" ><br><br>
+
+    <label for="aDrain">Medición sensor de drenaje despues de riego:</label><br>
+    <input type="number" id="aDrain" name="aDrain" value="9" step="0.01" ><br><br>
+
+    <button type="button" id="consultSensorsButton">Consultar sensores</button>
+    <button type="submit" value="Calcular Próximo Riego">Calcular próximo riego</button>
+  </form>
+  <table>
+    <thead>
+      <tr>
+        <th>Base Irrigation</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+      </tr>
+    </thead>
+    <tbody id="irrigationTableBody">
+
+    </tbody>
+  </table>
+  <script src="./index.mjs" type="module"></script>
+
+</body>
+
+</html>
+<link rel="stylesheet" type="text/css" href="styles.css">

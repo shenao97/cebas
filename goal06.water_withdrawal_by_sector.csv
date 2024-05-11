@@ -1,0 +1,17 @@
+Dia;Tiempo de riego;Prox Riego;;Ejecución función;;;;Numero de riego;tiempo min;tiempo max;base;increment
+1;100;115;;11:00am;;;;1;60;120;60;0,15
+2;115;132,25;;11:00am;;;;1;;;;
+3;132,25;66,125;incremento;11:00am;;;;1;;;;
+4;66,125;76,04375;;08:00am;;;;2;;;;
+4;76,04375;76,04375;Igual;05:00pm;;;;2;;;;
+5;76,04375;64,6371875;;08:00am;;;;2;;;;
+5;64,6371875;54,94160938;disminuye;05:00pm;;;;2;;;;
+6;109,8832188;;;;;;;1;;;;
+;;;;;;;;;;;;
+;;;;;;;;;;;;
+;Si el último riego del día * num riegos es inferior al tiempo máximo de riego Entonces devolverse a un riego diario;;;;;;;;;;;
+;;;;;;;;;;;;
+Riegos;;;;;;;;;;;;
+1;9:00 a. m.;;;;;;;;;;;
+2;6:00 a. m.;3:00 p. m.;;;;;;;;;;
+3;5:00 a. m.;11:00 a. m.;5:00 p. m.;;;;;;;;;
