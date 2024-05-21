@@ -10,6 +10,12 @@
 </head>
 
 <body>
+  <div class="navbar">
+    <div class="container">
+      <img src="https://agritechmurcia.com/wp-content/uploads/2017/01/images.jpg" alt="Logo" class="logo">
+    </div>
+  </div>
+
   <div id="app"></div>
   <h2>Condiciones iniciales</h2>
   <form id="parcelConfigForm">
@@ -83,35 +89,45 @@
       <label for="startTime2">Inicio 3° irrigación (opcional):</label>
       <input type="time" id="startTime3" name="startTime3">
     </div>
-    <button type="submit" value="set initialConditions">Establecer configuración inicial</button>
+    <button type="button" class="alert" id="resetButton">Restablecer valores iniciales</button>
+    <button type="submit" value="setInitialConditions">Establecer configuración inicial</button>
   </form>
 
-
+  <div class="loading" id="loading">
+    <p>Trayendo información de la API...</p>
+  </div>
 
 
   <h2>Formulario de Irrigación</h2>
   <form id="irrigationForm">
-    <label for="bRoots">Medición sensor de raices antes de riego:</label><br>
-    <input type="number" id="bRoots" name="bRoots" value="11" step="0.01" ><br><br>
-
-    <label for="aRoots">Medición sensor de raices despues de riego:</label><br>
-    <input type="number" id="aRoots" name="aRoots" value="10" step="0.01" ><br><br>
-
-    <label for="bDrain">Medición sensor de drenaje antes de riego:</label><br>
-    <input type="number" id="bDrain" name="bDrain" value="10" step="0.01" ><br><br>
-
-    <label for="aDrain">Medición sensor de drenaje despues de riego:</label><br>
-    <input type="number" id="aDrain" name="aDrain" value="9" step="0.01" ><br><br>
-
-    <button type="button" id="consultSensorsButton">Consultar sensores</button>
+    <div>
+      <label for="bRoots">Medición sensor de raices antes de riego:</label>
+      <input type="number" id="bRoots" name="bRoots"  step="0.01" required>
+    </div>
+    <div>
+      <label for="aRoots">Medición sensor de raices despues de riego:</label>
+      <input type="number" id="aRoots" name="aRoots" step="0.01" required>
+    </div>
+    <div>
+      <label for="bDrain">Medición sensor de drenaje antes de riego:</label>
+      <input type="number" id="bDrain" name="bDrain"  step="0.01" required>
+    </div>
+    <div>
+      <label for="aDrain">Medición sensor de drenaje despues de riego:</label>
+      <input type="number" id="aDrain" name="aDrain" step="0.01" required>
+    </div>
+    <button type="button" id="getSensorData">Consultar sensores</button>
     <button type="submit" value="Calcular Próximo Riego">Calcular próximo riego</button>
   </form>
+
+  
+  <h2>Calendario de riegos</h2>
   <table>
     <thead>
       <tr>
-        <th>Base Irrigation</th>
-        <th>Start Time</th>
-        <th>End Time</th>
+        <th>Tiempo de riego</th>
+        <th>Fecha de inicio</th>
+        <th>Fecha de fin</th>
       </tr>
     </thead>
     <tbody id="irrigationTableBody">

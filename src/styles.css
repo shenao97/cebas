@@ -1,7 +1,8 @@
 body {
-  font-family: 'Sora', sans-serif !important;
+  font-family: 'Sora', sans-serif;
   background-color: #f8f9fa;
-  margin: 40px;
+  font-size: 14px;
+  margin: 10px 40px;
   padding: 0;
 }
 
@@ -12,7 +13,11 @@ form {
   border-radius: 5px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-gap: 10px;
+  grid-gap: 5px;
+}
+
+h2 {
+  margin: 20px;
 }
 
 label {
@@ -25,7 +30,6 @@ input[type="number"],
 input[type="time"],
 input[type="checkbox"],
 input[type="date"],
-
 select {
   width: calc(100% - 12px);
   padding: 8px;
@@ -34,19 +38,59 @@ select {
   border-radius: 5px;
   box-sizing: border-box;
   font-family: 'Sora', sans-serif;
+  font-size: 12px;
 }
 
 button {
-  grid-column: span 2;
-  background-color: #007bff;
+  grid-column: span 1;
+  background-color: #92ba43;
   color: #fff;
   border: none;
   border-radius: 5px;
   padding: 10px 20px;
   cursor: pointer;
-  font-family: 'Sora', sans-serif !important;
+}
+
+.alert{
+  background-color: #d44949;
+}
+.alert:hover{
+  background-color: #d44949;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #92ba43;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 20px;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.navbar .logo {
+  height: 50px; 
+  margin-left: 20px;
+}
+
+.loading {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 9999;
+  text-align: center;
+  padding-top: 20%;
 }
