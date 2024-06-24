@@ -25,7 +25,7 @@
         <option value="1">10</option>
         <option value="2">20</option>
         <option value="3">30</option>
-        <option value="4">40</option>
+        <option value="4" selected>40</option>
         <option value="5">50</option>
         <option value="6">60</option>
       </select>
@@ -38,40 +38,40 @@
         <option value="3">30</option>
         <option value="4">40</option>
         <option value="5">50</option>
-        <option value="6">60</option>
+        <option value="6" selected>60</option>
       </select>
     </div>
     <div>
       <label for="aRootsTimelapse">Lapso de tiempo para raíces (h):</label>
-      <input type="number" id="aRootsTimelapse" name="aRootsTimelapse" required>
+      <input type="number" id="aRootsTimelapse" name="aRootsTimelapse"  value="6" required>
     </div>
     <div>
       <label for="aDrainTimelapse">Lapso de tiempo para drenaje (h):</label>
-      <input type="number" id="aDrainTimelapse" name="aDrainTimelapse" required>
+      <input type="number" id="aDrainTimelapse" name="aDrainTimelapse" value="6" required>
     </div>
     <div>
       <label for="rootsLThreshold">Umbral de raíces:</label>
-      <input type="number" id="rootsLThreshold" name="rootsLThreshold" step="0.1" required>
+      <input type="number" id="rootsLThreshold" name="rootsLThreshold" step="0.1" value="0" required>
     </div>
     <div>
       <label for="drainLThreshold">Umbral de drenaje:</label>
-      <input type="number" id="drainLThreshold" name="drainLThreshold" step="0.1" required>
+      <input type="number" id="drainLThreshold" name="drainLThreshold" step="0.1" value="0" required>
     </div>
     <div>
       <label for="percentageIncrement">Porcentaje variación (%):</label>
-      <input type="number" id="percentageIncrement" name="percentageIncrement" required>
+      <input type="number" id="percentageIncrement" name="percentageIncrement" value="15" required>
     </div>
     <div>
       <label for="baseIrrigation">Base de riego (min):</label>
-      <input type="number" id="baseIrrigation" name="baseIrrigation" required>
+      <input type="number" id="baseIrrigation" name="baseIrrigation" value="90" required>
     </div>
     <div>
       <label for="minIrrigationTimeMin">Duración mínima de riego (min) :</label>
-      <input type="number" id="minIrrigationTimeMin" name="minIrrigationTimeMin" required>
+      <input type="number" id="minIrrigationTimeMin" name="minIrrigationTimeMin" value="60" required>
     </div>
     <div>
       <label for="maxIrrigationTimeMin">Duración máxima de riego (min):</label>
-      <input type="number" id="maxIrrigationTimeMin" name="maxIrrigationTimeMin" required>
+      <input type="number" id="maxIrrigationTimeMin" name="maxIrrigationTimeMin" value="120" required>
     </div>
     <div>
       <label for="startTime1">Fecha inicio:</label>
@@ -100,6 +100,14 @@
 
   <h2>Formulario de Irrigación</h2>
   <form id="irrigationForm">
+    <!--<div>
+      <label for="controllerId">Id del controlador:</label>
+      <input type="text" id="controllerId" name="controllerId" value="IPex12:00052" required>
+    </div>
+    <div>
+      <label for="deviceId">Id de la sonda:</label>
+      <input type="text" id="deviceId" name="deviceId" value="sdi12_5f1abe29f7d565578dd3e044_Humidity" required>
+    </div>-->
     <div>
       <label for="bRoots">Medición sensor de raices antes de riego:</label>
       <input type="number" id="bRoots" name="bRoots"  step="0.01" required>

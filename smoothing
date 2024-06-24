@@ -1,0 +1,18 @@
+function calculateExponentialSmoothing(data, alpha) {
+  let smoothedData = [data[0]];  // inicializa los datos suavizados con el primer dato
+
+  for (let i = 1; i < data.length; i++) {
+    const nextSmoothedValue = alpha * data[i] + (1 - alpha) * smoothedData[i - 1];
+    smoothedData.push(nextSmoothedValue);
+  }
+
+  return smoothedData;
+}
+
+function calculateTrend(data) {
+  // Calcula la tendencia de los datos
+  const smoothedData = calculateExponentialSmoothing(data, 0.5);  // utiliza un factor de suavizado de 0.5
+  const trend = smoothedData[smoothedData.length - 1] - smoothedData[0];  // calcula la diferencia entre el último y el primer punto de datos
+
+  return trend;
+}

@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   resetButton.addEventListener("click", function(event) {
     event.stopPropagation();
-    resetInitialConfig(); 
+    resetInitialConfig();
   });
 
   getSensorDataButton.addEventListener("click", function(event) {
@@ -40,7 +40,10 @@ function setupInitialConfig() {
   ];
 
   configFields.forEach(field => {
-    document.getElementById(field).value = initialParcelConfig.config && initialParcelConfig.config[field] || '';
+    let fieldValue = initialParcelConfig.config && initialParcelConfig.config[field];
+    if (fieldValue !== undefined && fieldValue !== null) {
+      document.getElementById(field).value = fieldValue;
+    }
   });
 }
 
@@ -145,7 +148,7 @@ function setupInitialIrrigation(initialConfig) {
   const initialIrrigation = {
     id: 0,
     isPending: false,
-    parcelName: initialConfig.parcelName || "Parcela de Ejemplo",
+    parcelName: initialConfig.parcelName || "Sector 2",
     config: initialConfig.config || {},
     startTime: moment(date).format("YYYY-MM-DD HH:mm:ss"),
     endTime: moment(date).add(initialConfig.config.baseIrrigation, 'minutes').format("YYYY-MM-DD HH:mm:ss")
@@ -208,36 +211,52 @@ function calculateNextEndTime() {
       const formattedNextEndTime = lastEndTime.format("YYYY-MM-DD HH:mm:ss");
       return formattedNextEndTime;
     } else {
-      console.log('No hay configuraciones no pendientes.');
+      alert('No hay configuraciones no pendientes.');
       return null;
     }
   } else {
-    console.log('No hay configuraciones almacenadas en el localStorage.');
+    alert('No hay configuraciones almacenadas.');
     return null;
   }
 }
 
 async function fetchData(authToken, url) {
   document.getElementById("loading").style.display = "block";
+  let aRootsTimelapse = 0
+  let aDrainTimelapse = 0
+
+  let data = localStorage.getItem('initialParcelConfig')
+  if (data) {
+    data = JSON.parse(data)
+    if (data.config) {
+      aRootsTimelapse = parseInt(data.config.aRootsTimelapse)
+      aDrainTimelapse = parseInt(data.config.aDrainTimelapse)
+    } else {
+
+      console.error('data.config is undefined')
+    }
+  } else {
+    console.error('data is null')
+  }
 
   const fields = getFormDataFromFields(['rootsL', 'drainL'])
-  const rootsLevel = fields.rootsL - 1 
+  const rootsLevel = fields.rootsL - 1 //Empiezan en 0
   const drainLevel = fields.drainL - 1
 
+  const measureTimeLapse = Math.max(aDrainTimelapse, aRootsTimelapse);
   const nextEndTime = calculateNextEndTime();
   if (!nextEndTime) {
     document.getElementById("loading").style.display = "none";
-    console.log('No se pudo calcular el próximo end time.');
+    alert('No se pudo calcular el próximo end time.');
     return;
   }
-
   const lastIrrigationTime = moment(nextEndTime).utcOffset(60);
   const startTime = lastIrrigationTime.clone();
-  const endTime = startTime.clone().add(2, 'hour');
+  const endTime = startTime.clone().add(measureTimeLapse, 'hour');
   const dateFrom = startTime.toISOString();
   const dateTo = endTime.toISOString();
   const URL = `${url}?dateFrom=${dateFrom}&dateTo=${dateTo}`
-
+  
   try {
     const response = await fetch(URL, {
       headers: {
@@ -247,27 +266,27 @@ async function fetchData(authToken, url) {
 
     if (response.ok) {
       const data = await response.json();
-
+      console.log(data)
       const firstResponse = data.contextResponses[0];
       const lastResponse = data.contextResponses[data.contextResponses.length - 1];
 
       const firstValues = firstResponse.contextElement.attributes[0].values;
       const firstValue = firstValues[0];
-      const firstRecvTime = firstValue.recvTime;
       const firstAttrValue = firstValue.attrValue;
 
       const lastValues = lastResponse.contextElement.attributes[0].values;
       const lastValue = lastValues[lastValues.length - 1];
-      const lastRecvTime = lastValue.recvTime;
       const lastAttrValue = lastValue.attrValue;
 
       updateFormValues(firstAttrValue[rootsLevel], firstAttrValue[drainLevel], lastAttrValue[rootsLevel], lastAttrValue[drainLevel]);
       document.getElementById("loading").style.display = "none";
     } else {
       console.error('Error al obtener los datos:', response.statusText);
+      alert('Error al obtener los datos. Por favor introduzca la información manualmente o vuelva a intentarlo')
     }
   } catch (error) {
     console.error('Error al realizar la solicitud:', error);
+    alert('Error al obtener los datos. Por favor introduzca la información manualmente o vuelva a intentarlo')
     document.getElementById("loading").style.display = "none";
   }
 }
@@ -331,8 +350,6 @@ function scheduleIrrigation(config, dataFromDevices, previousNumberOfIrrigations
       .clone()
       .add(duration, "milliseconds")
       .format("YYYY-MM-DD HH:mm:ss");
-
-
 
     const newConfig = {
       ...config.config,
@@ -472,8 +489,6 @@ function calculateNumberOfIrrigation(internalResponseDataset, p_config) {
   }
   return nIrrigations;
 }
-
-//Table
 
 function getIrrigationsList() {
   const savedIrrigations = localStorage.getItem('nextIrrigations');
