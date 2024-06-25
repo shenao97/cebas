@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>JavaScript Sandbox</title>
   <meta charset="UTF-8" />
@@ -8,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap" rel="stylesheet">
 </head>
-
 <body>
   <div class="navbar">
     <div class="container">
@@ -43,7 +41,7 @@
     </div>
     <div>
       <label for="aRootsTimelapse">Lapso de tiempo para raíces (h):</label>
-      <input type="number" id="aRootsTimelapse" name="aRootsTimelapse"  value="6" required>
+      <input type="number" id="aRootsTimelapse" name="aRootsTimelapse" value="6" required>
     </div>
     <div>
       <label for="aDrainTimelapse">Lapso de tiempo para drenaje (h):</label>
@@ -51,11 +49,11 @@
     </div>
     <div>
       <label for="rootsLThreshold">Umbral de raíces:</label>
-      <input type="number" id="rootsLThreshold" name="rootsLThreshold" step="0.1" value="0" required>
+      <input type="number" id="rootsLThreshold" name="rootsLThreshold" step="0.01" value="0" required>
     </div>
     <div>
       <label for="drainLThreshold">Umbral de drenaje:</label>
-      <input type="number" id="drainLThreshold" name="drainLThreshold" step="0.1" value="0" required>
+      <input type="number" id="drainLThreshold" name="drainLThreshold" step="0.01" value="0" required>
     </div>
     <div>
       <label for="percentageIncrement">Porcentaje variación (%):</label>
@@ -86,17 +84,17 @@
       <input type="time" id="startTime2" name="startTime2">
     </div>
     <div>
-      <label for="startTime2">Inicio 3° irrigación (opcional):</label>
+      <label for="startTime3">Inicio 3° irrigación (opcional):</label>
       <input type="time" id="startTime3" name="startTime3">
     </div>
     <button type="button" class="alert" id="resetButton">Restablecer valores iniciales</button>
-    <button type="submit" value="setInitialConditions">Establecer configuración inicial</button>
+    <button type="submit" id="initialConfigButton" value="setInitialConditions">Establecer configuración inicial</button>
+
   </form>
 
   <div class="loading" id="loading">
     <p>Trayendo información de la API...</p>
   </div>
-
 
   <h2>Formulario de Irrigación</h2>
   <form id="irrigationForm">
@@ -110,7 +108,7 @@
     </div>-->
     <div>
       <label for="bRoots">Medición sensor de raices antes de riego:</label>
-      <input type="number" id="bRoots" name="bRoots"  step="0.01" required>
+      <input type="number" id="bRoots" name="bRoots" step="0.01" required>
     </div>
     <div>
       <label for="aRoots">Medición sensor de raices despues de riego:</label>
@@ -118,7 +116,7 @@
     </div>
     <div>
       <label for="bDrain">Medición sensor de drenaje antes de riego:</label>
-      <input type="number" id="bDrain" name="bDrain"  step="0.01" required>
+      <input type="number" id="bDrain" name="bDrain" step="0.01" required>
     </div>
     <div>
       <label for="aDrain">Medición sensor de drenaje despues de riego:</label>
@@ -128,7 +126,6 @@
     <button type="submit" value="Calcular Próximo Riego">Calcular próximo riego</button>
   </form>
 
-  
   <h2>Calendario de riegos</h2>
   <table>
     <thead>
@@ -139,12 +136,9 @@
       </tr>
     </thead>
     <tbody id="irrigationTableBody">
-
     </tbody>
   </table>
   <script src="./index.mjs" type="module"></script>
-
 </body>
-
 </html>
 <link rel="stylesheet" type="text/css" href="styles.css">

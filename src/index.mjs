@@ -28,6 +28,8 @@ document.addEventListener("DOMContentLoaded", function() {
     event.stopPropagation();
     fetchData(authToken, url);
   });
+
+  updateInitialConfigButton();
 });
 
 function setupInitialConfig() {
@@ -81,8 +83,27 @@ function handleConfigFormSubmit(event) {
   if (!localStorage.getItem('initialParcelConfig')) {
     localStorage.setItem('initialParcelConfig', JSON.stringify(initialParcelConfig));
     setupInitialIrrigation(initialParcelConfig);
+  } else {
+    localStorage.setItem('initialParcelConfig', JSON.stringify(initialParcelConfig));
+    setupInitialConfig();
   }
 
+  updateInitialConfigButton();
+}
+
+function updateInitialConfigButton() {
+  const initialConfigButton = document.getElementById('initialConfigButton');
+  console.log('Botón inicial:', initialConfigButton); // Agregar este console.log para depurar
+  
+  if (initialConfigButton) {
+      if (localStorage.getItem('initialParcelConfig')) {
+          initialConfigButton.textContent = 'Modificar condiciones iniciales';
+      } else {
+          initialConfigButton.textContent = 'Establecer configuración inicial';
+      }
+  } else {
+      console.error('El botón inicial no fue encontrado en el DOM.');
+  }
 }
 
 function handleIrrigationFormSubmit(event) {
@@ -165,10 +186,8 @@ function setupInitialIrrigation(initialConfig) {
 }
 
 function resetInitialConfig() {
-  // Eliminar todos los datos del localStorage
   localStorage.clear();
 
-  // Reiniciar los campos del formulario
   const fieldNames = [
     'rootsL', 'drainL', 'aRootsTimelapse', 'aDrainTimelapse', 'percentageIncrement',
     'rootsLThreshold', 'drainLThreshold', 'baseIrrigation', 'minIrrigationTimeMin',
@@ -184,6 +203,7 @@ function resetInitialConfig() {
 
   console.log("Valores iniciales restablecidos y LocalStorage limpiado.");
 
+  updateInitialConfigButton();
 }
 
 //----------------------------------------------------------------------//
@@ -278,7 +298,7 @@ async function fetchData(authToken, url) {
       const lastValue = lastValues[lastValues.length - 1];
       const lastAttrValue = lastValue.attrValue;
 
-      updateFormValues(firstAttrValue[rootsLevel], firstAttrValue[drainLevel], lastAttrValue[rootsLevel], lastAttrValue[drainLevel]);
+      updateFormValues(firstAttrValue[rootsLevel], lastAttrValue[rootsLevel], firstAttrValue[drainLevel], lastAttrValue[drainLevel]);
       document.getElementById("loading").style.display = "none";
     } else {
       console.error('Error al obtener los datos:', response.statusText);
@@ -302,11 +322,12 @@ function updateFormValues(bRootsValue, aRootsValue, bDrainValue, aDrainValue) {
 
 function scheduleIrrigation(config, dataFromDevices, previousNumberOfIrrigations) {
   // Calcula el próximo riego
+  console.log('entré')
   let nextIrrigation = calculateNextIrrigation({ ...config, config: { ...config.config, baseIrrigation: config.config.baseIrrigation * previousNumberOfIrrigations } }, dataFromDevices);
   const incrementPercentage = nextIrrigation.incrementPercentage / 100;
   const numberOfIrrigations = nextIrrigation.numberOfIrrigations;
   let newBaseIrrigation = calcNewBaseIrrigation(config, config.config.baseIrrigation * previousNumberOfIrrigations, incrementPercentage, numberOfIrrigations);
-
+  console.log(nextIrrigation)
   let previousStartIrrigation = moment(dataFromDevices.irrigationStart);
   const currentDate = previousStartIrrigation
     .clone()
@@ -334,13 +355,15 @@ function scheduleIrrigation(config, dataFromDevices, previousNumberOfIrrigations
     ]
   }
   else {
+    console.log('entré por acá')
     irrigationRanges = [
       //moment(currentDate + " 06:00:00"),
       moment(currentDate + " " + config.config.startTime1 + ":00"),
     ]
   }
-
+  console.log('eoooo',numberOfIrrigations)
   for (let i = 0; i < numberOfIrrigations; i++) {
+    console.log('hola')
     const last_index = nextIrrigations.length ? nextIrrigations[nextIrrigations.length - 1].id : 0;
     const duration = newBaseIrrigation * 60 * 1000;
     const startTime = moment(irrigationRanges[i])
@@ -364,6 +387,8 @@ function scheduleIrrigation(config, dataFromDevices, previousNumberOfIrrigations
       startTime,
       endTime,
     }
+
+    console.log(irrigation)
     nextIrrigations.push(irrigation);
   }
 
@@ -473,6 +498,7 @@ function calculateNextIrrigation(p_config, p_dataRetrieved) {
 }
 
 function calculateNumberOfIrrigation(internalResponseDataset, p_config) {
+  console.log('aca estoyyyy')
   let nIrrigations = 1;
   const baseIrrigation = p_config.config.baseIrrigation;
   const incrementPercentage = internalResponseDataset.incrementPercentage / 100;
@@ -486,6 +512,9 @@ function calculateNumberOfIrrigation(internalResponseDataset, p_config) {
   while (tempIrrigationValue < p_config.config.minIrrigationTimeMin) {
     nIrrigations--;
     tempIrrigationValue = nextIrrigationValue / nIrrigations;
+    if(nIrrigations === 0){
+      nIrrigations = 1
+    }
   }
   return nIrrigations;
 }
