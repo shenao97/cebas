@@ -5,6 +5,8 @@ const deviceId = process.env.DEVICE_ID
 const url = `${process.env.API_URL}/backend/STH/v1/contextEntities/type/Device/id/${controllerId}/attributes/${deviceId}`;
 const authToken = process.env.API_KEY;
 
+apiUrl = 'http://localhost:5000/api'
+
 let nextIrrigations = [];
 const dayInMs = (24 * 60 * 60 * 1000);
 
@@ -80,12 +82,47 @@ function handleConfigFormSubmit(event) {
     config: formData
   };
 
-  if (!localStorage.getItem('initialParcelConfig')) {
-    localStorage.setItem('initialParcelConfig', JSON.stringify(initialParcelConfig));
-    setupInitialIrrigation(initialParcelConfig);
+  const existingConfig = localStorage.getItem('initialParcelConfig');
+
+  if (!existingConfig) {
+    // Save new configuration to backend
+    fetch(`${apiUrl}/config`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': authToken
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Configuración inicial guardada:', data);
+      localStorage.setItem('initialParcelConfig', JSON.stringify({ ...initialParcelConfig, _id: data.data._id }));
+      setupInitialIrrigation(initialParcelConfig);
+    })
+    .catch(error => {
+      console.error('Error al guardar la configuración inicial:', error);
+    });
   } else {
-    localStorage.setItem('initialParcelConfig', JSON.stringify(initialParcelConfig));
-    setupInitialConfig();
+    // Update existing configuration
+    const configId = JSON.parse(existingConfig)._id;
+    fetch(`${apiUrl}/config/${configId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': authToken
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Configuración inicial actualizada:', data);
+      localStorage.setItem('initialParcelConfig', JSON.stringify({ ...initialParcelConfig, _id: data.data._id }));
+      setupInitialConfig();
+    })
+    .catch(error => {
+      console.error('Error al actualizar la configuración inicial:', error);
+    });
   }
 
   updateInitialConfigButton();
@@ -93,16 +130,10 @@ function handleConfigFormSubmit(event) {
 
 function updateInitialConfigButton() {
   const initialConfigButton = document.getElementById('initialConfigButton');
-  console.log('Botón inicial:', initialConfigButton); // Agregar este console.log para depurar
-  
-  if (initialConfigButton) {
-      if (localStorage.getItem('initialParcelConfig')) {
-          initialConfigButton.textContent = 'Modificar condiciones iniciales';
-      } else {
-          initialConfigButton.textContent = 'Establecer configuración inicial';
-      }
+  if (localStorage.getItem('initialParcelConfig')) {
+    initialConfigButton.textContent = 'Modificar condiciones iniciales';
   } else {
-      console.error('El botón inicial no fue encontrado en el DOM.');
+    initialConfigButton.textContent = 'Establecer configuración inicial';
   }
 }
 
@@ -159,8 +190,8 @@ function handleIrrigationFormSubmit(event) {
     scheduleIrrigation(parcelConfig, dataFromDevices, numberOfIrrigations);
   }
   localStorage.setItem('nextIrrigations', JSON.stringify(nextIrrigations));
-  //const nextEndTime = calculateNextEndTime();
-  //console.log('Próximo end time aproximado:', nextEndTime);
+
+  updateBackendIrrigations();
 }
 
 function setupInitialIrrigation(initialConfig) {
@@ -186,8 +217,10 @@ function setupInitialIrrigation(initialConfig) {
 }
 
 function resetInitialConfig() {
+  // Eliminar todos los datos del localStorage
   localStorage.clear();
 
+  // Reiniciar los campos del formulario
   const fieldNames = [
     'rootsL', 'drainL', 'aRootsTimelapse', 'aDrainTimelapse', 'percentageIncrement',
     'rootsLThreshold', 'drainLThreshold', 'baseIrrigation', 'minIrrigationTimeMin',
@@ -220,8 +253,6 @@ function calculateNextEndTime() {
     if (nonPendingConfigurations.length > 0) {
       const lastNonPendingConfig = nonPendingConfigurations[nonPendingConfigurations.length - 1];
       const lastEndTime = moment(lastNonPendingConfig.endTime);
-      //const aDrainTimelapse = lastNonPendingConfig.config.aDrainTimelapse || 1;
-      //let nextEndTime = lastEndTime.add(aDrainTimelapse, 'hours');
       const minutes = lastEndTime.minutes();
       if (minutes >= 0 && minutes < 30) {
         lastEndTime.minutes(30);
@@ -252,7 +283,6 @@ async function fetchData(authToken, url) {
       aRootsTimelapse = parseInt(data.config.aRootsTimelapse)
       aDrainTimelapse = parseInt(data.config.aDrainTimelapse)
     } else {
-
       console.error('data.config is undefined')
     }
   } else {
@@ -298,7 +328,7 @@ async function fetchData(authToken, url) {
       const lastValue = lastValues[lastValues.length - 1];
       const lastAttrValue = lastValue.attrValue;
 
-      updateFormValues(firstAttrValue[rootsLevel], lastAttrValue[rootsLevel], firstAttrValue[drainLevel], lastAttrValue[drainLevel]);
+      updateFormValues(firstAttrValue[rootsLevel], firstAttrValue[drainLevel], lastAttrValue[rootsLevel], lastAttrValue[drainLevel]);
       document.getElementById("loading").style.display = "none";
     } else {
       console.error('Error al obtener los datos:', response.statusText);
@@ -322,12 +352,11 @@ function updateFormValues(bRootsValue, aRootsValue, bDrainValue, aDrainValue) {
 
 function scheduleIrrigation(config, dataFromDevices, previousNumberOfIrrigations) {
   // Calcula el próximo riego
-  console.log('entré')
   let nextIrrigation = calculateNextIrrigation({ ...config, config: { ...config.config, baseIrrigation: config.config.baseIrrigation * previousNumberOfIrrigations } }, dataFromDevices);
   const incrementPercentage = nextIrrigation.incrementPercentage / 100;
   const numberOfIrrigations = nextIrrigation.numberOfIrrigations;
   let newBaseIrrigation = calcNewBaseIrrigation(config, config.config.baseIrrigation * previousNumberOfIrrigations, incrementPercentage, numberOfIrrigations);
-  console.log(nextIrrigation)
+
   let previousStartIrrigation = moment(dataFromDevices.irrigationStart);
   const currentDate = previousStartIrrigation
     .clone()
@@ -355,15 +384,12 @@ function scheduleIrrigation(config, dataFromDevices, previousNumberOfIrrigations
     ]
   }
   else {
-    console.log('entré por acá')
     irrigationRanges = [
-      //moment(currentDate + " 06:00:00"),
       moment(currentDate + " " + config.config.startTime1 + ":00"),
     ]
   }
-  console.log('eoooo',numberOfIrrigations)
+
   for (let i = 0; i < numberOfIrrigations; i++) {
-    console.log('hola')
     const last_index = nextIrrigations.length ? nextIrrigations[nextIrrigations.length - 1].id : 0;
     const duration = newBaseIrrigation * 60 * 1000;
     const startTime = moment(irrigationRanges[i])
@@ -387,16 +413,16 @@ function scheduleIrrigation(config, dataFromDevices, previousNumberOfIrrigations
       startTime,
       endTime,
     }
-
-    console.log(irrigation)
     nextIrrigations.push(irrigation);
   }
 
   displayIrrigationsInTable(nextIrrigations);
+
+  // Enviar datos al backend
+  updateBackendIrrigations();
 }
 
 function updateIrrigation(config, dataFromDevices, pendingIrrigations) {
-
   let nextIrrigation = calculateNextIrrigation(config, dataFromDevices);
   const incrementPercentage = nextIrrigation.incrementPercentage / 100;
   const numberOfIrrigations = 1;
@@ -426,6 +452,9 @@ function updateIrrigation(config, dataFromDevices, pendingIrrigations) {
 
   nextIrrigations[nextIrrigations.length - pendingIrrigations.length] = irrigation;
   displayIrrigationsInTable(nextIrrigations);
+
+  // Enviar datos al backend
+  updateBackendIrrigations();
 }
 
 const calcNewBaseIrrigation = (config, baseIrrigation, increment, numberOfIrrigations) => {
@@ -498,7 +527,6 @@ function calculateNextIrrigation(p_config, p_dataRetrieved) {
 }
 
 function calculateNumberOfIrrigation(internalResponseDataset, p_config) {
-  console.log('aca estoyyyy')
   let nIrrigations = 1;
   const baseIrrigation = p_config.config.baseIrrigation;
   const incrementPercentage = internalResponseDataset.incrementPercentage / 100;
@@ -512,21 +540,26 @@ function calculateNumberOfIrrigation(internalResponseDataset, p_config) {
   while (tempIrrigationValue < p_config.config.minIrrigationTimeMin) {
     nIrrigations--;
     tempIrrigationValue = nextIrrigationValue / nIrrigations;
-    if(nIrrigations === 0){
-      nIrrigations = 1
-    }
   }
   return nIrrigations;
 }
 
 function getIrrigationsList() {
-  const savedIrrigations = localStorage.getItem('nextIrrigations');
-  if (savedIrrigations) {
-    nextIrrigations = JSON.parse(savedIrrigations);
+  fetch(`${apiUrl}/irrigation`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-access-token': authToken
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    nextIrrigations = data.data || [];
     displayIrrigationsInTable(nextIrrigations);
-  } else {
-    nextIrrigations = [];
-  }
+  })
+  .catch(error => {
+    console.error('Error al obtener las irrigaciones:', error);
+  });
 }
 
 function displayIrrigationsInTable(irrigations) {
@@ -540,7 +573,91 @@ function displayIrrigationsInTable(irrigations) {
       <td>${irrigation.config.baseIrrigation}</td>
       <td>${irrigation.startTime}</td>
       <td>${irrigation.endTime}</td>
+      <td>
+        <button class="edit-btn" data-id="${irrigation._id}">Editar</button>
+        <button class="delete-btn" data-id="${irrigation._id}">Eliminar</button>
+      </td>
     `;
     tableBody.appendChild(row);
+  });
+
+  // Agregar eventos para los botones de edición y eliminación
+  document.querySelectorAll('.edit-btn').forEach(button => {
+    button.addEventListener('click', handleEditIrrigation);
+  });
+  document.querySelectorAll('.delete-btn').forEach(button => {
+    button.addEventListener('click', handleDeleteIrrigation);
+  });
+}
+
+function handleEditIrrigation(event) {
+  const id = event.target.dataset.id;
+  const irrigation = nextIrrigations.find(irrigation => irrigation._id === id);
+  if (irrigation) {
+    const newBaseIrrigation = prompt("Nueva base de riego (min):", irrigation.config.baseIrrigation);
+    if (newBaseIrrigation !== null) {
+      irrigation.config.baseIrrigation = parseInt(newBaseIrrigation);
+      updateIrrigationInBackend(irrigation);
+    }
+  }
+}
+
+function handleDeleteIrrigation(event) {
+  const id = event.target.dataset.id;
+  deleteIrrigationFromBackend(id);
+}
+
+function updateIrrigationInBackend(irrigation) {
+  fetch(`${apiUrl}/irrigation/${irrigation._id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-access-token': authToken
+    },
+    body: JSON.stringify({ irrigation, configId: irrigation.config._id })
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Irrigación actualizada:', data);
+    getIrrigationsList(); // Recargar la lista de irrigaciones
+  })
+  .catch(error => {
+    console.error('Error al actualizar la irrigación:', error);
+  });
+}
+
+function deleteIrrigationFromBackend(id) {
+  fetch(`${apiUrl}/irrigation/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-access-token': authToken
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Irrigación eliminada:', data);
+    getIrrigationsList(); // Recargar la lista de irrigaciones
+  })
+  .catch(error => {
+    console.error('Error al eliminar la irrigación:', error);
+  });
+}
+
+function updateBackendIrrigations() {
+  fetch(`${apiUrl}/irrigation`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-access-token': authToken
+    },
+    body: JSON.stringify(nextIrrigations)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Irrigaciones actualizadas en el backend:', data);
+  })
+  .catch(error => {
+    console.error('Error al actualizar las irrigaciones en el backend:', error);
   });
 }
